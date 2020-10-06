@@ -1,0 +1,31 @@
+{
+  "name": "react-chat-app",
+  "version": "1.0.0",
+  "description": "Real time messaging between different users and react(emoji) the user to another user message.",
+  "main": "server.js",
+  "dependencies": {
+    "apollo-server": "^2.18.2",
+    "graphql": "^15.3.0",
+    "mysql2": "^2.2.5",
+    "nodemon": "^2.0.4",
+    "sequelize": "^6.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zubair-Ashraf/react-chat-app.git"
+  },
+  "keywords": [
+    "chat-app"
+  ],
+  "author": "zubair-ashraf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Zubair-Ashraf/react-chat-app/issues"
+  },
+  "homepage": "https://github.com/Zubair-Ashraf/react-chat-app#readme"
+}
