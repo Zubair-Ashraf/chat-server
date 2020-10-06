@@ -4,3 +4,4 @@ Real time messaging between different users and react(emoji) the user to another
 - Express
 - Graphql
 - MySql DB
+- React-bootstrap
