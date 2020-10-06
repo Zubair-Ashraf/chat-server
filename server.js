@@ -6,6 +6,7 @@ const typeDefs = require("./graphql/types");
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: (ctx) => ctx,
 });
 
 server.listen().then(({ url }) => {

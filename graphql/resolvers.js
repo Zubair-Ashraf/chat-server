@@ -1,15 +1,54 @@
 const { User } = require("../models");
+const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
-const { UserInputError } = require("apollo-server");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/env.json");
+const { UserInputError, AuthenticationError } = require("apollo-server");
 
 const resolvers = {
   Query: {
-    getUsers: () => {
+    getUsers: (parent, args, { req }) => {
+      let user;
       try {
-        return User.findAll();
+        if (req.headers && req.headers.authorization) {
+          let token = req.headers.authorization.split("Bearer ")[1];
+          jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+            if (err) throw new AuthenticationError("Unanthenticated");
+            user = decodedToken;
+          });
+        }
+        return User.findAll({
+          where: { username: { [Op.ne]: user.username } },
+        });
       } catch (error) {
-        console.log(error);
+        throw error;
       }
+    },
+    login: async (parent, { username, password }) => {
+      let errors = {};
+      const user = await User.findOne({
+        where: { username },
+      });
+      if (!user) {
+        errors.username = "User not found";
+        throw new UserInputError("User not found", { errors });
+      }
+      let isPasswordMatched = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatched) {
+        errors.password = "Invalid password";
+        throw new UserInputError("Invalid password", { errors });
+      }
+
+      let token = jwt.sign(
+        { id: user.id, username: user.username },
+        JWT_SECRET,
+        { expiresIn: "7 days" }
+      );
+      return {
+        ...user.toJSON(),
+        createdAt: user.createdAt.toISOString(),
+        token,
+      };
     },
   },
   Mutation: {
