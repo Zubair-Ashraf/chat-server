@@ -1,22 +1,15 @@
-const { User } = require("../models");
+const { User } = require("../../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/env.json");
+const { JWT_SECRET } = require("../../config/env.json");
 const { UserInputError, AuthenticationError } = require("apollo-server");
 
 const resolvers = {
   Query: {
-    getUsers: (parent, args, { req }) => {
-      let user;
+    getUsers: (parent, args, { user }) => {
+      if (!user) throw new AuthenticationError("Unanthenticated");
       try {
-        if (req.headers && req.headers.authorization) {
-          let token = req.headers.authorization.split("Bearer ")[1];
-          jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
-            if (err) throw new AuthenticationError("Unanthenticated");
-            user = decodedToken;
-          });
-        }
         return User.findAll({
           where: { username: { [Op.ne]: user.username } },
         });
