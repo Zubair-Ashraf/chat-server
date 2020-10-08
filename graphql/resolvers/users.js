@@ -1,4 +1,4 @@
-const { User } = require("../../models");
+const { User, Message } = require("../../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -7,12 +7,28 @@ const { UserInputError, AuthenticationError } = require("apollo-server");
 
 const resolvers = {
   Query: {
-    getUsers: (parent, args, { user }) => {
+    getUsers: async (parent, args, { user }) => {
       if (!user) throw new AuthenticationError("Unanthenticated");
       try {
-        return User.findAll({
+        let users = await User.findAll({
+          attributes: ["username", "imageUrl", "createdAt"],
           where: { username: { [Op.ne]: user.username } },
         });
+        const allUserMessages = await Message.findAll({
+          where: {
+            [Op.or]: [{ from: user.username }, { to: user.username }],
+          },
+          order: [["createdAt", "DESC"]],
+        });
+
+        users = users.map((otherUser) => {
+          const latestMessage = allUserMessages.find(
+            (m) => m.from === otherUser.username || m.to === otherUser.username
+          );
+          otherUser.latestMessage = latestMessage;
+          return otherUser;
+        });
+        return users;
       } catch (error) {
         throw error;
       }
