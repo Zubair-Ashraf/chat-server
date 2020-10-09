@@ -55,7 +55,6 @@ const resolvers = {
       );
       return {
         ...user.toJSON(),
-        createdAt: user.createdAt.toISOString(),
         token,
       };
     },
